@@ -1,0 +1,17 @@
+{
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true
+    },
+    "python.formatting.provider": "none",
+    "workbench.colorTheme": "Atom One Dark",
+    "python.analysis.autoSearchPaths": true,
+    "python.autoComplete.extraPaths": [
+        "/usr/lib/python3.10/site-packages",
+        "/usr/lib/python3.10/"
+    ],
+    "python.analysis.extraPaths": [
+        "/usr/lib/python3.10/site-packages",
+        "/usr/lib/python3.10/"
+    ]
+}
