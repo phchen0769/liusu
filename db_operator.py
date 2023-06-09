@@ -1,5 +1,6 @@
 import sqlite3
 import pandas as pd
+import streamlit as st
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
@@ -22,7 +23,7 @@ class Student(Base):
     par_phone = Column(String(16))
     dormitory = Column(String(10))
     address = Column(String(32))
-    ischoice = Column(Integer)
+    is_choice = Column(Integer)
 
     # __repr__方法用于输出该类的对象被print()时输出的字符串，如果不想写可以不写
     def __repr__(self):
@@ -48,6 +49,7 @@ class SysParam(Base):
 
 
 # 读取excle
+@st.cache_data
 def read_xlsx(file_name):
     # 传入文件名，读取excle文件
     xls = pd.ExcelFile(file_name)
@@ -77,7 +79,7 @@ def to_sql(df):
             par_phone=row[3],
             dormitory=row[4],
             address=row[5],
-            ischoice=row[6],
+            is_choice=row[6],
         )
         session.add(student_obj)
 
@@ -87,6 +89,7 @@ def to_sql(df):
 
 
 # 读取数据库中的数据
+@st.cache_data
 def out_sql(table_name):
     # 创建数据库连接引擎
     engine = create_engine("sqlite:///myDB.db", echo=True)
@@ -94,17 +97,8 @@ def out_sql(table_name):
     return pd.read_sql(sql_command, engine)
 
 
-# 文件下载
-def get_binary_file_downloader_html(bin_file, file_label="File"):
-    with open(bin_file, "rb") as f:
-        data = f.read()
-    bin_str = base64.b64encode(data).decode()
-    href = f'<a href="data:application/octet-stream;base64,{bin_str}" download="{os.path.basename(bin_file)}">点击下载 {file_label}</a>'
-    return href
-
-
 if __name__ == "__main__":
     # 从excel导入数据到数据库
-    # to_sql(read_xlsx("./students_info.xlsx")[1])
+    to_sql(read_xlsx("./students_info.xlsx")[1])
     print(out_sql("sys_info"))
     print(out_sql("stu_info"))
