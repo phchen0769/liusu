@@ -8,13 +8,13 @@
             "name": "Python: Streamlit",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            // "program": "/home/vscode/.local/bin/streamlit",
-            // "args": [
-            //     "run",
-            //     "${file}"
-            // ],
+            // "program": "${file}",
+            // "console": "integratedTerminal",
+            "program": "/home/vscode/.local/bin/streamlit",
+            "args": [
+                "run",
+                "${file}"
+            ],
             "env": {
                 "PYTHONPATH": "${workspaceRoot}"
             },

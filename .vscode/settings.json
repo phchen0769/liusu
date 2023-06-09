@@ -3,6 +3,7 @@
         "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.formatOnSave": true
     },
+
     "python.formatting.provider": "none",
     "workbench.colorTheme": "Atom One Dark",
     "python.analysis.autoSearchPaths": true,

@@ -4,17 +4,18 @@ from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
+
 # 建立ORM基础类
 Base = declarative_base()
 
 
-# 定义ORM映射
+# 定义Student的ORM映射
 class Student(Base):
     # 指定本类映射到stu_info表
     __tablename__ = "stu_info"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    # 指定name映射到name字段; name字段为字符串类形，
+    # 指定name映射到name字段; name字段为字符串类形
     stu_name = Column(String(10))
     stu_phone = Column(String(16))
     par_name = Column(String(10))
@@ -25,26 +26,25 @@ class Student(Base):
 
     # __repr__方法用于输出该类的对象被print()时输出的字符串，如果不想写可以不写
     def __repr__(self):
-        return f"<User(stu_name={self.stu_name},stu_phone={self.stu_phone},\
+        return f"<Student(stu_name={self.stu_name},stu_phone={self.stu_phone},\
             par_name={self.par_name},par_phone={self.par_phone},\
                 dormitory={self.dormitory},address={self.address},\
                     ischoice={self.ischoice}>"
 
 
-# def con_sqlite3(db_name):
-#     # 创建链接
-#     conn = sqlite3.connect(db_name)
-#     # 创建数据库游标
-#     # cur = conn.cursor()
-#     # 创建查询语句
-#     sql_str = 'select * from sys_info'
-#     # # 执行查询语句
-#     # cur.execute(sql_str)
-#     # result = cur.fetchall()
-#     # print(result)
+# 定义sys的ORM影响
+class SysParam(Base):
+    __tablename__ = "sys_info"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    creator = Column(String(32))
+    department = Column(String(16))
+    class_name = Column(String(16))
+    week = Column(Integer)
+    reason = Column(String(64))
+    option = Column(Integer)
 
-#     df = pd.read_sql(sql_str, conn)
-#     print(df)
+    def __repr__(self):
+        return f"<SysParam(creator={self.creator},department={self.department},class_name={self.class_name},week={self.week},reason={self.reason},option={self.option}"
 
 
 # 读取excle
@@ -61,7 +61,7 @@ def read_xlsx(file_name):
 # 写入数据库，形参：pandas对象、数据库名、表名
 def to_sql(df):
     # 创建数据库连接引擎
-    engine = create_engine(f"sqlite:///myDB.db", echo=True)
+    engine = create_engine("sqlite:///myDB.db", echo=True)
     # 建立table
     Base.metadata.create_all(engine)
     # 建立session对象
@@ -86,6 +86,14 @@ def to_sql(df):
     session.close()
 
 
+# 读取数据库中的数据
+def out_sql(table_name):
+    # 创建数据库连接引擎
+    engine = create_engine("sqlite:///myDB.db", echo=True)
+    sql_command = f"select * from {table_name}"
+    return pd.read_sql(sql_command, engine)
+
+
 # 文件下载
 def get_binary_file_downloader_html(bin_file, file_label="File"):
     with open(bin_file, "rb") as f:
@@ -96,6 +104,7 @@ def get_binary_file_downloader_html(bin_file, file_label="File"):
 
 
 if __name__ == "__main__":
-    info_tuple = read_xlsx("./students_info.xlsx")
-    to_sql(info_tuple[1])
-    pass
+    # 从excel导入数据到数据库
+    # to_sql(read_xlsx("./students_info.xlsx")[1])
+    print(out_sql("sys_info"))
+    print(out_sql("stu_info"))
