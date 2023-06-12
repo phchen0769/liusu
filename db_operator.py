@@ -37,15 +37,15 @@ class Student(Base):
 class SysParam(Base):
     __tablename__ = "sys_info"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    creator = Column(String(32))
+    creater = Column(String(32))
     department = Column(String(16))
     class_name = Column(String(16))
     week = Column(Integer)
     reason = Column(String(64))
-    option = Column(Integer)
+    option = Column(String(16))
 
     def __repr__(self):
-        return f"<SysParam(creator={self.creator},department={self.department},class_name={self.class_name},week={self.week},reason={self.reason},option={self.option}"
+        return f"<SysParam(creater={self.creater},department={self.department},class_name={self.class_name},week={self.week},reason={self.reason},option={self.option}"
 
 
 # 读取excle
@@ -60,8 +60,11 @@ def read_xlsx(file_name):
     return sys_info, stu_info
 
 
-# 写入数据库，形参：pandas对象、数据库名、表名
-def to_sql(df):
+# 以追加的形式，写入数据库
+def to_sql_sys_info(sys_info_df):
+    """
+    sys_info_df: df_object()=>none
+    """
     # 创建数据库连接引擎
     engine = create_engine("sqlite:///myDB.db", echo=True)
     # 建立table
@@ -71,7 +74,34 @@ def to_sql(df):
     session = Session()
 
     # 数据写入数据库
-    for row in df.values:
+    for row in sys_info_df.values:
+        sys_obj = SysParam(
+            creater=row[0],
+            department=row[1],
+            class_name=row[2],
+            week=row[3],
+            reason=row[4],
+            option=row[5],
+        )
+        session.add(sys_obj)
+
+    # 保存
+    session.commit()
+    session.close()
+
+
+# 写入数据库，形参：pandas对象、数据库名、表名
+def to_sql_stu_info(stu_info_df):
+    # 创建数据库连接引擎
+    engine = create_engine("sqlite:///myDB.db", echo=True)
+    # 建立table
+    Base.metadata.create_all(engine)
+    # 建立session对象
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    # 数据写入数据库
+    for row in stu_info_df.values:
         student_obj = Student(
             stu_name=row[0],
             stu_phone=row[1],
@@ -99,6 +129,7 @@ def out_sql(table_name):
 
 if __name__ == "__main__":
     # 从excel导入数据到数据库
-    to_sql(read_xlsx("./students_info.xlsx")[1])
+    to_sql_stu_info(read_xlsx("./students_info.xlsx")[1])
+    to_sql_sys_info(read_xlsx("./students_info.xlsx")[0])
     print(out_sql("sys_info"))
     print(out_sql("stu_info"))

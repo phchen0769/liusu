@@ -6,8 +6,8 @@ import pandas as pd
 from st_aggrid import AgGrid, DataReturnMode, GridUpdateMode, GridOptionsBuilder
 
 from db_operator import out_sql
-from body_create import createBody
-from url_send import get_token, info_send
+from body_create import body_create_df
+from info_send import get_token, info_send
 
 
 # 初始化 站点显示参数
@@ -22,6 +22,11 @@ st.set_page_config(
 
 # 显示侧边栏
 def show_sidebar(stu_info_df, sys_info_df):
+    """
+        stu_info_df: Any,
+        sys_info_df: Any
+    ) -> None
+    """
     # 标题
     st.sidebar.markdown("# 学生留宿管理系统")
 
@@ -69,10 +74,9 @@ def show_sidebar(stu_info_df, sys_info_df):
         if st.form_submit_button("提交"):
             # 生成access_token
             access_token = get_token()
-            # access_token = "PwUOUcUozgN2cPAZNPEYZBN1F9kZ9nkZf9WVy3-wB7zNwb1tZNt7sYZELie71Qy_zPwYHqDfjjXt6kiZutnJcj7aYmhNc5iY8I5JC3fOKNw030VZfkgeBPje1qoRnvwxgXd2rWi2bVCWxqROLzneMmUGdi4Z3mMkWvdHuXk7Y_eExiinej96DkivplHqoFckoacBf5AMiDaCiXlf7Rceog"
 
             # 构建待发送消息的主体
-            body_json = build_body.createBody("./students_info.xlsx")
+            body_json = body_create_df(sys_info_df, stu_info_df)
 
             # 发送请求
             info_send(access_token, body_json)
@@ -109,12 +113,20 @@ def show_content(stu_info_df):
         )
 
 
-if __name__ == "__main__":
+def main():
     # 从数据库获取，学生留宿信息
     stu_info_df = out_sql("stu_info")
 
     # 从数据库获取，系统信息
     sys_info_df = out_sql("sys_info")
 
+    # 发送请求
+    # info_send(access_token, body_json)
+
+    # 显示siderbar
     show_sidebar(stu_info_df, sys_info_df)
     show_content(stu_info_df)
+
+
+if __name__ == "__main__":
+    main()
