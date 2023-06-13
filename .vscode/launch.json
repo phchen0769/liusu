@@ -14,6 +14,7 @@
             "args": [
                 "run",
                 "${file}"
+                // "index.py"
             ],
             "env": {
                 "PYTHONPATH": "${workspaceRoot}"

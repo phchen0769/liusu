@@ -12,22 +12,20 @@ def body_create_df(sys_info_df, stu_info_df):
     """
 
     # 从df中读取学生数据，转换成学生信息字典列表
-    students_list = []
-    stu_info = [
-        "stu_name",
-        "stu_phone",
-        "par_name",
-        "par_phone",
-        "dormitory",
-        "address",
-    ]
-    for i in stu_info_df.values:
-        print(i[7])
-        if i[7] == 1:
-            students_list.append(dict(zip(stu_info, i)))
+    # students_list = []
+    # stu_info = [
+    #     "stu_name",
+    #     "stu_phone",
+    #     "par_name",
+    #     "par_phone",
+    #     "dormitory",
+    #     "address",
+    # ]
+    # for i in stu_info_df:
+    #     students_list.append(dict(zip(stu_info, i)))
 
     # 计算需要提交学生的人数
-    students_nums = len(students_list)
+    students_nums = len(stu_info_df)
 
     # sys_info_df.values[0]中读取第六个参数
     if sys_info_df.values[0][5] == "申请长期留宿":
@@ -125,18 +123,18 @@ def body_create_df(sys_info_df, stu_info_df):
     # 取出学生字典中的学生信息，存储到临时变量children中
     for children in children_dics:
         # 留宿变更名单--学生姓名
-        children["list"][0]["value"]["text"] = students_list[0]["stu_name"]
+        children["list"][0]["value"]["text"] = stu_info_df[0]["stu_name"]
         # 留宿变更名单--学生手机
-        children["list"][1]["value"]["new_number"] = students_list[0]["stu_phone"]
+        children["list"][1]["value"]["new_number"] = stu_info_df[0]["stu_phone"]
         # 留宿变更名单--学生家长
-        children["list"][2]["value"]["text"] = students_list[0]["par_name"]
+        children["list"][2]["value"]["text"] = stu_info_df[0]["par_name"]
         # 留宿变更名单--学生家长手机
-        children["list"][3]["value"]["new_number"] = students_list[0]["par_phone"]
+        children["list"][3]["value"]["new_number"] = stu_info_df[0]["par_phone"]
         # 留宿变更名单--学生宿舍
-        children["list"][4]["value"]["text"] = students_list[0]["dormitory"]
+        children["list"][4]["value"]["text"] = stu_info_df[0]["dormitory"]
         # 留宿变更名单--学生家庭住址
-        children["list"][5]["value"]["text"] = students_list[0]["address"]
-        students_list.pop(0)
+        children["list"][5]["value"]["text"] = stu_info_df[0]["address"]
+        stu_info_df.pop(0)
 
     # children_dics覆盖原body中的children
     if sys_info_df.values[0][5] == "申请长期留宿":
@@ -158,7 +156,7 @@ if __name__ == "__main__":
     sys_info_df = out_sql("sys_info")
 
     # 通过df对象操作
-    body_json = body_create_df()
+    body_json = body_create_df(sys_info_df, stu_info_df)
     body_str = json.dumps(body_json, ensure_ascii=False)
 
     # 生成json文件，便于查看。

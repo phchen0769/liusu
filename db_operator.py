@@ -23,20 +23,18 @@ class Student(Base):
     par_phone = Column(String(16))
     dormitory = Column(String(10))
     address = Column(String(32))
-    is_choice = Column(Integer)
 
     # __repr__方法用于输出该类的对象被print()时输出的字符串，如果不想写可以不写
     def __repr__(self):
         return f"<Student(stu_name={self.stu_name},stu_phone={self.stu_phone},\
             par_name={self.par_name},par_phone={self.par_phone},\
-                dormitory={self.dormitory},address={self.address},\
-                    ischoice={self.ischoice}>"
+                dormitory={self.dormitory},address={self.address}>"
 
 
 # 定义sys的ORM影响
 class SysParam(Base):
     __tablename__ = "sys_info"
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True)
     creater = Column(String(32))
     department = Column(String(16))
     class_name = Column(String(16))
@@ -109,7 +107,6 @@ def to_sql_stu_info(stu_info_df):
             par_phone=row[3],
             dormitory=row[4],
             address=row[5],
-            is_choice=row[6],
         )
         session.add(student_obj)
 
@@ -119,12 +116,44 @@ def to_sql_stu_info(stu_info_df):
 
 
 # 读取数据库中的数据
-@st.cache_data
+# @st.cache_data
 def out_sql(table_name):
     # 创建数据库连接引擎
     engine = create_engine("sqlite:///myDB.db", echo=True)
     sql_command = f"select * from {table_name}"
     return pd.read_sql(sql_command, engine)
+
+
+# def del_table(table_name):
+#     # 创建数据库连接引擎
+#     engine = create_engine("sqlite:///myDB.db", echo=True)
+#     sql_command = f"drop table {table_name}"
+
+
+def update_sys_info_table(sys_info_df):
+    # 创建数据库连接引擎
+    engine = create_engine("sqlite:///myDB.db", echo=True)
+    Base.metadata.create_all(engine)
+    # Base = declarative_base()
+    # 建立session对象
+    DBsession = sessionmaker(bind=engine)
+    session = DBsession()
+
+    # Base = declarative_base()
+    # 新增数据
+    session.query(SysParam).filter_by(id=1).update(
+        {
+            SysParam.creater: sys_info_df.values[0][0],
+            SysParam.department: sys_info_df.values[0][1],
+            SysParam.class_name: sys_info_df.values[0][2],
+            SysParam.week: sys_info_df.values[0][3],
+            SysParam.reason: sys_info_df.values[0][4],
+            SysParam.option: sys_info_df.values[0][5],
+        }
+    )
+    session.commit()
+    session.close()
+    return True
 
 
 if __name__ == "__main__":
