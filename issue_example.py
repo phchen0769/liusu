@@ -53,3 +53,17 @@ if response["selected_rows"]:
         st.write(
             f"All we know is that a node with Id `{nodeId}` is selected.\n\r How do we know if you're looking for a `Fruit` or a `Vegetable`?"
         )
+
+# 增加行
+    # if 'n_rows' not in st.session_state:
+    #     st.session_state.n_rows = 1
+
+    # add = st.button(label="add")
+
+    # if add:
+    #     st.session_state.n_rows += 1
+    #     st.experimental_rerun()
+
+    # for i in range(st.session_state.n_rows):
+    #     #add text inputs here
+    #     st.text_input(label="列名", key=i) # 传递一个索引作为key
