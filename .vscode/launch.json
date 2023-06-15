@@ -13,8 +13,9 @@
             "program": "/home/vscode/.local/bin/streamlit",
             "args": [
                 "run",
-                "${file}"
-                // "index.py"
+                "${file}",
+                "--server.port",
+                "8888"
             ],
             "env": {
                 "PYTHONPATH": "${workspaceRoot}"

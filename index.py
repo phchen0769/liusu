@@ -37,7 +37,7 @@ def aggrid(stu_info_df):
     if stu_info_df.empty:
         # 创建一个空容器，用于占位
         container = st.container()
-        container.write("学生信息表为空！")
+        container.markdown("# 学生信息表为空！")
     else:
         # 更改显示的列
         # rencolnames = {
@@ -54,40 +54,41 @@ def aggrid(stu_info_df):
 
         gb = GridOptionsBuilder.from_dataframe(stu_info_df)
         # 配置列的默认设置
+        gb.configure_auto_height(autoHeight=True)
         gb.configure_default_column(
             # 自动高度
             autoHeight=True,
-            # 可调节宽度
-            resizable=True,
-            # 可过滤
-            filterable=True,
-            # 可排序
-            sorteable=True,
-            # 可编辑
+            # # 可编辑
             editable=True,
         )
-        gb.configure_column(field="id", header_name="序号", width=70, editable=False)
+        gb.configure_column(field="id", header_name="序号", width=70)
         gb.configure_column(field="stu_name", header_name="学生姓名", width=100)
         gb.configure_column(field="stu_phone", header_name="学生手机", width=100)
         gb.configure_column(field="par_name", header_name="家长姓名", width=100)
         gb.configure_column(field="par_phone", header_name="家长手机", width=100)
         gb.configure_column(field="dormitory", header_name="宿舍号", width=100)
-        gb.configure_column(field="address", header_name="家庭住址", width=400)
-        gb.configure_selection(selection_mode="multiple", use_checkbox=True)
+        gb.configure_column(field="address", header_name="家庭住址", width=500)
+        gb.configure_selection(
+            selection_mode="multiple",
+            use_checkbox=True,
+            # 预选
+            # pre_selected_rows=[{"id": 1}, {"id": 2}],
+            # suppressRowClickSelection=True,
+        )
+        # 表格右侧工具栏
         gb.configure_side_bar()
         # 分页
         gb.configure_pagination(
-            enabled=True,
-            paginationAutoPageSize=True,
-            # paginationPageSize=5,
+            # paginationAutoPageSize=False,
+            # paginationPageSize=10,
         )
+
         gridoptions = gb.build()
 
         # 渲染表格
-        grid_response = AgGrid(
+        grid_res = AgGrid(
             stu_info_df,
             gridOptions=gridoptions,
-            # columns_auto_size_mode=ColumnsAutoSizeMode.FIT_ALL_COLUMNS_TO_VIEW,
             fit_columns_on_grid_load=True,
             update_mode=GridUpdateMode.GRID_CHANGED,
             data_return_mode=DataReturnMode.AS_INPUT,
@@ -97,8 +98,7 @@ def aggrid(stu_info_df):
             # height=2000,
         )
         # 返回数据
-
-        return grid_response
+        return grid_res
 
 
 # 显示侧边栏
@@ -144,7 +144,7 @@ def show_sidebar(sys_info_df):
         # input控件：创建者ID
         creater = st.sidebar.text_input(label="创建者ID", value=sys_info_df.values[0][1])
 
-        # selectbox空间，所属部门
+        # selectbox控件，所属部门
         department = st.sidebar.selectbox(
             label="所属部门",
             options=(list(department_dict.keys())),
@@ -173,7 +173,7 @@ def show_sidebar(sys_info_df):
             format_func=option_to_value,
         )
 
-        # form_submit_button，表单提交按钮
+        # form_submit_button控件，表单提交按钮
         if st.form_submit_button("更新"):
             # 把数据转换成pf
             sys_info_df = pd.DataFrame(
@@ -187,58 +187,91 @@ def show_sidebar(sys_info_df):
                 },
                 index=[0],
             )
-            # 把数据保存到数据中
+
+            # 把数据保存到数据库中
             if update_sys_info_table(sys_info_df):
-                st.write("设置已更新！")
+                st.success("设置已更新！")
 
 
 # 显示content内容
 def show_content(stu_info_df, sys_info_df):
-    # download_btn控件，下载导入模板
-    with open("students_info.xlsx", "rb") as file:
-        st.download_button(
-            label="下载导入模板", data=file, file_name="student_info.xlsx", mime="ms-excel"
+    row1, row2 = st.columns(2)
+
+    with row1:
+        # download_btn控件，下载导入模板
+        with open("students_info.xlsx", "rb") as file:
+            st.download_button(
+                label="下载导入模板",
+                data=file,
+                file_name="student_info.xlsx",
+                mime="ms-excel",
+            )
+
+    with row2:
+        # file_uploader控件，上传excle表
+        uploaded_file = st.file_uploader(
+            label="导入数据", type=["xlsx"], accept_multiple_files=False
         )
-
-    # btn控件，清空学生信息
-    if st.button(label="清空学生信息"):
-        if del_data():
-            st.write("学生信息已清空！")
-
-    # file_uploader控件，上传excle表
-    uploaded_file = st.file_uploader(
-        label="导入数据", type=["xlsx"], accept_multiple_files=False
-    )
-    if uploaded_file:
-        # 读取上传的excel表
-        df = read_xlsx(uploaded_file)[1]
-        # 数据导入数据库
-        to_sql_stu_info(df)
+        if uploaded_file:
+            # 读取上传的excel表
+            df = read_xlsx(uploaded_file)[1]
+            # 数据导入数据库
+            to_sql_stu_info(df)
+            st.success("导入成功！")
 
     st.markdown("***")
-    st.markdown("#### 学生留宿信息")
-    # st.markdown("![](https://pic.imgdb.cn/item/64827a781ddac507ccf95116.jpg)")
 
     # form控件，学生信息不为空，显示控件
     if not stu_info_df.empty:
+        st.markdown("#### 学生留宿信息")
+
+        # form控件，表单
         with st.form("stu_info_form"):
             # aggrid控件
-            response = aggrid(stu_info_df)
+            grid_res = aggrid(stu_info_df)
+            selection = grid_res["selected_rows"]
 
-            # form_submit_btn控件，表单提交
-            if st.form_submit_button("提交"):
-                selection = response["selected_rows"]
+            # 设置按钮布局
+            col1, col2, col3 = st.columns(3)
 
-                # 生成access_token
-                access_token = get_token()
+            with col1:
+                # form_submit_btn控件，表单提交
+                if st.form_submit_button("提交", help="提交选中学生到企业微信。"):
+                    if not len(selection) == 0:
+                        # 生成access_token
+                        access_token = get_token()
 
-                # 构建待发送消息的主体
-                body_json = body_create_df(sys_info_df, selection)
+                        # 构建待发送消息的主体
+                        body_json = body_create_df(sys_info_df, selection)
 
-                # 发送请求
-                info_send(access_token, body_json)
+                        # 发送请求
+                        info_send(access_token, body_json)
+                    else:
+                        st.warning("没有选中需要提交的学生。")
+
+            with col2:
+                # form_submit_btn控件，表单提交--删除被选中学生信息
+                if st.form_submit_button(
+                    "删除学生信息", help="删除被选中学生信息,如果所有学生都没有被选中，则删除所有学生信息。"
+                ):
+                    if len(selection):
+                        for i in selection:
+                            del_data(i["id"])
+                        st.success("学生信息已删除！")
+                    else:
+                        if del_data(id=0):
+                            st.success("学生信息已清空！")
+                        else:
+                            st.error("删除失败！")
+
+            with col3:
+                if st.form_submit_button("获取学生信息"):
+                    st.write(
+                        grid_res.data[~grid_res.data[["IO_Num", "Review.Sign.Off"]]]
+                    )
+
     else:
-        st.write("学生留宿信息为空！请先导入数据。")
+        st.markdown("### 学生留宿信息为空！请先导入数据。")
 
 
 def main():

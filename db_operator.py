@@ -47,7 +47,6 @@ class SysParam(Base):
 
 
 # 读取excle
-# @st.cache_data
 def read_xlsx(file_name):
     # 传入文件名，读取excle文件
     xls = pd.ExcelFile(file_name)
@@ -58,7 +57,7 @@ def read_xlsx(file_name):
     return sys_info, stu_info
 
 
-# 以追加的形式，写入数据库
+# excel导入数据库表sys_info
 def to_sql_sys_info(sys_info_df):
     """
     sys_info_df: df_object()=>none
@@ -97,7 +96,7 @@ def to_sql_sys_info(sys_info_df):
     session.close()
 
 
-# 写入数据库，形参：pandas对象、数据库名、表名
+# excel导入数据库表stu_info
 def to_sql_stu_info(stu_info_df):
     # 创建数据库连接引擎
     engine = create_engine("sqlite:///myDB.db", echo=True)
@@ -135,27 +134,18 @@ def out_sql(table_name):
 
 
 # 清空stu_info数据表中的数据
-def del_data():
+def del_data(id):
     # 创建数据库连接引擎
     engine = create_engine("sqlite:///myDB.db", echo=True)
     Session = sessionmaker(bind=engine)
     session = Session()
-    session.query(Student).delete()
+    if id:
+        session.query(Student).filter(Student.id == id).delete()
+    else:
+        session.query(Student).delete()
     session.commit()
     session.close()
     return True
-
-
-# 清空stu_info数据表中的数据
-# def del_data():
-#     # 创建数据库连接引擎
-#     engine = create_engine("sqlite:///myDB.db", echo=True)
-#     Session = sessionmaker(bind=engine)
-#     session = Session()
-#     session.query(Student).filter(Student.id == "*").delete()
-#     session.commit()
-#     session.close()
-#     return True
 
 
 # 保存系统配置到sys_info表
