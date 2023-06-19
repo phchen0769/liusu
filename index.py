@@ -5,6 +5,7 @@ import streamlit as st
 import pandas as pd
 from st_aggrid import (
     AgGrid,
+    JsCode,
     ColumnsAutoSizeMode,
     DataReturnMode,
     GridUpdateMode,
@@ -16,6 +17,7 @@ from db_operator import (
     to_sql_stu_info,
     to_sql_sys_info,
     update_sys_info_table,
+    update_sn_num_table,
     read_xlsx,
     del_data,
 )
@@ -29,6 +31,72 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="auto",
     menu_items=None,
+)
+
+
+# 打开aggrid调试信息
+# js_console = JsCode(
+#     """
+# function(e) {
+#     debugger;
+#     alert(e.node.data);
+#     console.log(e);
+#     console.log(e.node.data);
+#     console.log(e.node.selected);
+#     console.log('jay');
+#     console.log(e.rowIndex);
+#     return e.node.data
+# };
+# """
+# )
+
+# JS方法，用于增加一行到AgGrid表格
+js_add_row = JsCode(
+    """
+function(e) {
+    let api = e.api;
+    let rowPos = e.rowIndex + 1;
+    // 数据转换成JSON
+    api.applyTransaction({addIndex: rowPos, add: [{}]})
+    };
+"""
+)
+
+# 为'🔧'列增加一个按钮
+cellRenderer_addButton = JsCode(
+    """
+    class BtnCellRenderer {
+        init(params) {
+            this.params = params;
+            this.eGui = document.createElement('div');
+            this.eGui.innerHTML = `
+            <span>
+                <style>
+                .btn_add {
+                    background-color: #EAECEE;
+                    border: 1px solid black;
+                    color: #AEB6BF;
+                    text-align: center;
+                    display: inline-block;
+                    font-size: 12px;
+                    font-weight: bold;
+                    height: 2em;
+                    width: 5em;
+                    border-radius: 12px;
+                    padding: 0px;
+                }
+                </style>
+                <button id='click-button' 
+                    class="btn_add" 
+                    >&#x2193; 添加</button>
+            </span>
+        `;
+        }
+        getGui() {
+            return this.eGui;
+        }
+    };
+    """
 )
 
 
@@ -52,38 +120,76 @@ def aggrid(stu_info_df):
         # }
         # stu_info_df = stu_info_df.rename(columns=rencolnames)
 
-        gb = GridOptionsBuilder.from_dataframe(stu_info_df)
+        gd = GridOptionsBuilder.from_dataframe(stu_info_df)
+        # 打开ag-grid调试信息,选择后输出调试信息
+        # gd.configure_grid_options(onRowSelected=js_console)
+        # gd.configure_grid_options(onRowEditingStopped=js_on_save)
         # 配置列的默认设置
-        gb.configure_auto_height(autoHeight=True)
-        gb.configure_default_column(
+        gd.configure_auto_height(autoHeight=True)
+        gd.configure_default_column(
             # 自动高度
             autoHeight=True,
             # # 可编辑
             editable=True,
         )
-        gb.configure_column(field="id", header_name="序号", width=70)
-        gb.configure_column(field="stu_name", header_name="学生姓名", width=100)
-        gb.configure_column(field="stu_phone", header_name="学生手机", width=100)
-        gb.configure_column(field="par_name", header_name="家长姓名", width=100)
-        gb.configure_column(field="par_phone", header_name="家长手机", width=100)
-        gb.configure_column(field="dormitory", header_name="宿舍号", width=100)
-        gb.configure_column(field="address", header_name="家庭住址", width=500)
-        gb.configure_selection(
+        gd.configure_column(
+            field="id",
+            header_name="序号",
+            width=70,
+        )
+        gd.configure_column(
+            field="stu_name",
+            header_name="学生姓名",
+            width=100,
+        )
+        gd.configure_column(
+            field="stu_phone",
+            header_name="学生手机",
+            width=100,
+        )
+        gd.configure_column(
+            field="par_name",
+            header_name="家长姓名",
+            width=100,
+        )
+        gd.configure_column(
+            field="par_phone",
+            header_name="家长手机",
+            width=100,
+        )
+        gd.configure_column(
+            field="dormitory",
+            header_name="宿舍号",
+            width=100,
+        )
+        gd.configure_column(
+            field="address",
+            header_name="家庭住址",
+            width=500,
+        )
+        gd.configure_column(
+            field="🔧",
+            onCellClicked=js_add_row,
+            cellRenderer=cellRenderer_addButton,
+            lockPosition="left",
+            width=70,
+        )
+        gd.configure_selection(
             selection_mode="multiple",
             use_checkbox=True,
             # 预选
             # pre_selected_rows=[{"id": 1}, {"id": 2}],
-            # suppressRowClickSelection=True,
+            # suppressRowClickSelection=False,
         )
         # 表格右侧工具栏
-        gb.configure_side_bar()
+        gd.configure_side_bar()
         # 分页
-        gb.configure_pagination(
-            # paginationAutoPageSize=False,
-            # paginationPageSize=10,
+        gd.configure_pagination(
+            paginationAutoPageSize=False,
+            paginationPageSize=20,
         )
 
-        gridoptions = gb.build()
+        gridoptions = gd.build()
 
         # 渲染表格
         grid_res = AgGrid(
@@ -265,13 +371,15 @@ def show_content(stu_info_df, sys_info_df):
                             st.error("删除失败！")
 
             with col3:
-                if st.form_submit_button("获取学生信息"):
-                    st.write(
-                        grid_res.data[~grid_res.data[["IO_Num", "Review.Sign.Off"]]]
-                    )
+                if st.form_submit_button("保存"):
+                    if del_data(id=0) and to_sql_stu_info(grid_res.data):
+                        st.success("学生信息已保存！")
+                    else:
+                        st.error("保存失败！")
 
     else:
-        st.markdown("### 学生留宿信息为空！请先导入数据。")
+        # st.markdown("### 学生留宿信息为空！请先导入数据。")
+        st.error("学生留宿信息为空！请先导入数据。")
 
 
 def main():
@@ -281,8 +389,10 @@ def main():
     # 从数据库获取，系统信息
     sys_info_df = out_sql("sys_info")
 
-    # 显示siderbar
+    # 显示siderbar页
     show_sidebar(sys_info_df)
+
+    # 显示content页
     show_content(stu_info_df, sys_info_df)
 
 
