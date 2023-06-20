@@ -62,7 +62,7 @@ function(e) {
 """
 )
 
-# 为'🔧'列增加一个按钮
+# 为'🌟'列增加一个按钮
 cellRenderer_addButton = JsCode(
     """
     class BtnCellRenderer {
@@ -74,7 +74,7 @@ cellRenderer_addButton = JsCode(
                 <style>
                 .btn_add {
                     background-color: #EAECEE;
-                    border: 1px solid black;
+                    # border: 1px solid black;
                     color: #AEB6BF;
                     text-align: center;
                     display: inline-block;
@@ -123,12 +123,9 @@ def aggrid(stu_info_df):
         gd = GridOptionsBuilder.from_dataframe(stu_info_df)
         # 打开ag-grid调试信息,选择后输出调试信息
         # gd.configure_grid_options(onRowSelected=js_console)
-        # gd.configure_grid_options(onRowEditingStopped=js_on_save)
         # 配置列的默认设置
         gd.configure_auto_height(autoHeight=True)
         gd.configure_default_column(
-            # 自动高度
-            autoHeight=True,
             # # 可编辑
             editable=True,
         )
@@ -168,7 +165,7 @@ def aggrid(stu_info_df):
             width=500,
         )
         gd.configure_column(
-            field="🔧",
+            field="🌟",
             onCellClicked=js_add_row,
             cellRenderer=cellRenderer_addButton,
             lockPosition="left",
@@ -185,8 +182,8 @@ def aggrid(stu_info_df):
         gd.configure_side_bar()
         # 分页
         gd.configure_pagination(
-            paginationAutoPageSize=False,
-            paginationPageSize=20,
+            # paginationAutoPageSize=False,
+            # paginationPageSize=20,
         )
 
         gridoptions = gd.build()
@@ -201,7 +198,6 @@ def aggrid(stu_info_df):
             allow_unsafe_jscode=True,
             theme="streamlit",
             # streamlit,alpine,balham,material
-            # height=2000,
         )
         # 返回数据
         return grid_res
@@ -279,31 +275,38 @@ def show_sidebar(sys_info_df):
             format_func=option_to_value,
         )
 
-        # form_submit_button控件，表单提交按钮
-        if st.form_submit_button("更新"):
-            # 把数据转换成pf
-            sys_info_df = pd.DataFrame(
-                {
-                    "creater": creater,
-                    "department": department,
-                    "class_name": class_name,
-                    "week": week,
-                    "reason": reason,
-                    "option": option,
-                },
-                index=[0],
-            )
+        sb_col1, sb_col2 = st.columns(2)
 
-            # 把数据保存到数据库中
-            if update_sys_info_table(sys_info_df):
-                st.success("设置已更新！")
+        with sb_col1:
+            st.info("第三步：")
+        # form_submit_button控件，表单提交按钮
+
+        with sb_col2:
+            if st.form_submit_button("更新"):
+                # 把数据转换成pf
+                sys_info_df = pd.DataFrame(
+                    {
+                        "creater": creater,
+                        "department": department,
+                        "class_name": class_name,
+                        "week": week,
+                        "reason": reason,
+                        "option": option,
+                    },
+                    index=[0],
+                )
+
+                # 把数据保存到数据库中
+                if update_sys_info_table(sys_info_df):
+                    st.success("设置已更新！")
 
 
 # 显示content内容
 def show_content(stu_info_df, sys_info_df):
-    row1, row2 = st.columns(2)
+    con_col1, con_col2 = st.columns(2)
 
-    with row1:
+    with con_col1:
+        st.info("第一步：")
         # download_btn控件，下载导入模板
         with open("students_info.xlsx", "rb") as file:
             st.download_button(
@@ -313,7 +316,8 @@ def show_content(stu_info_df, sys_info_df):
                 mime="ms-excel",
             )
 
-    with row2:
+    with con_col2:
+        st.info("第二步：")
         # file_uploader控件，上传excle表
         uploaded_file = st.file_uploader(
             label="导入数据", type=["xlsx"], accept_multiple_files=False
@@ -329,7 +333,11 @@ def show_content(stu_info_df, sys_info_df):
 
     # form控件，学生信息不为空，显示控件
     if not stu_info_df.empty:
-        st.markdown("#### 学生留宿信息")
+        tab_col1, tab_col2 = st.columns(2)
+        with tab_col1:
+            st.info("第四步：")
+        with tab_col2:
+            st.markdown("#### 学生信息")
 
         # form控件，表单
         with st.form("stu_info_form"):
@@ -338,9 +346,22 @@ def show_content(stu_info_df, sys_info_df):
             selection = grid_res["selected_rows"]
 
             # 设置按钮布局
-            col1, col2, col3 = st.columns(3)
+            col1, col2, col3, col4, col5, col6 = st.columns(6)
 
             with col1:
+                st.warning("第五步：非必须")
+
+            with col2:
+                if st.form_submit_button("保存"):
+                    if del_data(id=0) and to_sql_stu_info(grid_res.data):
+                        st.success("学生信息已保存！")
+                    else:
+                        st.error("保存失败！")
+
+            with col3:
+                st.info("第六步：")
+
+            with col4:
                 # form_submit_btn控件，表单提交
                 if st.form_submit_button("提交", help="提交选中学生到企业微信。"):
                     if not len(selection) == 0:
@@ -351,11 +372,15 @@ def show_content(stu_info_df, sys_info_df):
                         body_json = body_create_df(sys_info_df, selection)
 
                         # 发送请求
-                        info_send(access_token, body_json)
+                        result = info_send(access_token, body_json)
+                        st.error(f"{result}")
                     else:
-                        st.warning("没有选中需要提交的学生。")
+                        st.error("没有选中需要提交的学生。")
 
-            with col2:
+            with col5:
+                st.warning("第七步：非必须")
+
+            with col6:
                 # form_submit_btn控件，表单提交--删除被选中学生信息
                 if st.form_submit_button(
                     "删除学生信息", help="删除被选中学生信息,如果所有学生都没有被选中，则删除所有学生信息。"
@@ -370,19 +395,20 @@ def show_content(stu_info_df, sys_info_df):
                         else:
                             st.error("删除失败！")
 
-            with col3:
-                if st.form_submit_button("保存"):
-                    if del_data(id=0) and to_sql_stu_info(grid_res.data):
-                        st.success("学生信息已保存！")
-                    else:
-                        st.error("保存失败！")
-
     else:
         # st.markdown("### 学生留宿信息为空！请先导入数据。")
         st.error("学生留宿信息为空！请先导入数据。")
 
 
 def main():
+    # 隐藏made with streamlit
+    hide_streamlit_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            </style>
+            """
+    st.markdown(hide_streamlit_style, unsafe_allow_html=True)
     # 从数据库获取，学生留宿信息
     stu_info_df = out_sql("stu_info")
 
@@ -394,6 +420,8 @@ def main():
 
     # 显示content页
     show_content(stu_info_df, sys_info_df)
+
+    st.info("作者：陈沛华")
 
 
 if __name__ == "__main__":

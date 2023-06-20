@@ -1,6 +1,4 @@
-openpyxl
 pandas
 streamlit
-hydralit
 sqlalchemy
 streamlit-aggrid

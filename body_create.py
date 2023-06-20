@@ -11,19 +11,6 @@ def body_create_df(sys_info_df, stu_info_df):
     => json
     """
 
-    # 从df中读取学生数据，转换成学生信息字典列表
-    # students_list = []
-    # stu_info = [
-    #     "stu_name",
-    #     "stu_phone",
-    #     "par_name",
-    #     "par_phone",
-    #     "dormitory",
-    #     "address",
-    # ]
-    # for i in stu_info_df:
-    #     students_list.append(dict(zip(stu_info, i)))
-
     # 计算需要提交学生的人数
     students_nums = len(stu_info_df)
 

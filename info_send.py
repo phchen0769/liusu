@@ -3,8 +3,6 @@ import json
 import requests
 from requests.models import HTTPError
 
-requests.packages.urllib3.disable_warnings()
-
 import body_create
 
 
@@ -44,10 +42,14 @@ def info_send(access_token, body_json):
     try:
         res = requests.post(url=url, data=data, headers=headers, verify=False)
         # 打印返回信息
-        print(res.text)
-        print("发送成功！请返回企业微信中，请在企业微信关注审批状态变化，该窗口将在30秒后自动关闭。")
+        if res.status_code == 200:
+            resJson = json.loads(res.text)
+            if resJson["errcode"] == 0:
+                return "发送成功！请返回企业微信中，请在企业微信关注审批状态变化"
+            else:
+                return f'错误代码：{resJson["errcode"]},错误原因：{resJson["errmsg"]}'
     except requests.HTTPError as e:
-        print(e.errno)
+        return "网络错误。"
 
 
 def main():
@@ -55,14 +57,7 @@ def main():
     access_token = get_token()
     # access_token = "PwUOUcUozgN2cPAZNPEYZBN1F9kZ9nkZf9WVy3-wB7zNwb1tZNt7sYZELie71Qy_zPwYHqDfjjXt6kiZutnJcj7aYmhNc5iY8I5JC3fOKNw030VZfkgeBPje1qoRnvwxgXd2rWi2bVCWxqROLzneMmUGdi4Z3mMkWvdHuXk7Y_eExiinej96DkivplHqoFckoacBf5AMiDaCiXlf7Rceog"
 
-    # 构建待发送消息的主体
-    body_json = body_create.body_create("./students_info.xlsx")
-
-    # 发送请求
-    info_send(access_token, body_json)
-
 
 if __name__ == "__main__":
     main()
-    print()
     time.sleep(30)

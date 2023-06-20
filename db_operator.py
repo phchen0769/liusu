@@ -1,6 +1,4 @@
-import sqlite3
 import pandas as pd
-import streamlit as st
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
