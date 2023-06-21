@@ -2,6 +2,17 @@ import json
 
 from db_operator import out_sql
 
+# 定义selectbox显示用的department字典
+DEPARTMENT_DICT = {0: "信息技术系", 1: "机电技术系", 2: "财经商贸系", 3: "公共基础部"}
+
+# 定义selectbox显示用的option字典
+OPTION_DICT = {
+    0: "申请临时留宿",
+    1: "申请临时不留宿",
+    2: "申请长期留宿",
+    3: "申请取消长期留宿",
+}
+
 
 # 通过df对象生成发送内容
 def body_create_df(sys_info_df, stu_info_df):
@@ -46,31 +57,31 @@ def body_create_df(sys_info_df, stu_info_df):
         # 第几周
         body_json["apply_data"]["contents"][2]["value"][
             "new_number"
-        ] = sys_info_df.values[0][3]
+        ] = sys_info_df.values[0][4]
 
         # 申请原因
-        if sys_info_df.values[0][4] == "None":
+        if sys_info_df.values[0][5] == None:
             body_json["apply_data"]["contents"][3]["value"]["text"] = ""
         else:
             body_json["apply_data"]["contents"][3]["value"][
                 "text"
-            ] = sys_info_df.values[0][4]
+            ] = sys_info_df.values[0][5]
 
         # 变更类型名称
         body_json["apply_data"]["contents"][4]["value"]["selector"]["options"][0][
             "value"
-        ][0]["text"] = sys_info_df.values[0][5]
+        ][0]["text"] = OPTION_DICT[sys_info_df.values[0][6]]
 
         # 变更类型opthon-id
-        if sys_info_df.values[0][5] == "申请临时留宿":
+        if sys_info_df.values[0][6] == 0:
             body_json["apply_data"]["contents"][4]["value"]["selector"]["options"][0][
                 "key"
             ] = "option-528888885"
-        elif sys_info_df.values[0][5] == "申请临时不留宿":
+        elif sys_info_df.values[0][6] == 1:
             body_json["apply_data"]["contents"][4]["value"]["selector"]["options"][0][
                 "key"
             ] = "option-528888886"
-        elif sys_info_df.values[0][5] == "申请取消长期留宿":
+        elif sys_info_df.values[0][6] == 3:
             body_json["apply_data"]["contents"][4]["value"]["selector"]["options"][0][
                 "key"
             ] = "option-528888887"
@@ -80,7 +91,7 @@ def body_create_df(sys_info_df, stu_info_df):
             ] = ""
 
     # 创建者id号-共有
-    body_json["creator_userid"] = sys_info_df.values[0][0]
+    body_json["creator_userid"] = sys_info_df.values[0][1]
 
     # 所属部门id号-共有
     if sys_info_df.values[0][1] == "信息技术系":
@@ -95,10 +106,10 @@ def body_create_df(sys_info_df, stu_info_df):
         body_json["choose_party"]["partyid"] = ""
 
     # 所属部门名称-共有
-    body_json["choose_party"]["party_name"] = sys_info_df.values[0][1]
+    body_json["choose_party"]["party_name"] = DEPARTMENT_DICT[sys_info_df.values[0][2]]
 
     # 班级名称-共有
-    body_json["apply_data"]["contents"][1]["value"]["text"] = sys_info_df.values[0][2]
+    body_json["apply_data"]["contents"][1]["value"]["text"] = sys_info_df.values[0][3]
 
     # 根据students人数，生成对应数量的字典
     children_dics = [dict(children_dic[0]) for i in range(students_nums)]
@@ -124,7 +135,7 @@ def body_create_df(sys_info_df, stu_info_df):
         stu_info_df.pop(0)
 
     # children_dics覆盖原body中的children
-    if sys_info_df.values[0][5] == "申请长期留宿":
+    if sys_info_df.values[0][6] == 2:
         body_json["apply_data"]["contents"][2]["value"]["children"] = children_dics
     else:
         body_json["apply_data"]["contents"][5]["value"]["children"] = children_dics

@@ -21,7 +21,7 @@ from db_operator import (
     read_xlsx,
     del_data,
 )
-from body_create import body_create_df
+from body_create import body_create_df, DEPARTMENT_DICT, OPTION_DICT
 from info_send import get_token, info_send
 
 # 初始化 站点显示参数
@@ -224,24 +224,13 @@ def show_sidebar(sys_info_df):
 
     # 创建一个提交表单
     with st.sidebar.form("sys_info_form"):
-        # 定义selectbox显示用的department字典
-        department_dict = {0: "信息技术系", 1: "机电技术系", 2: "财经商贸系", 3: "公共基础部"}
-
-        # 定义selectbox显示用的option字典
-        option_dict = {
-            0: "申请临时留宿",
-            1: "申请临时不留宿",
-            2: "申请长期留宿",
-            3: "申请取消长期留宿",
-        }
-
         # 根据selectbox传来的key返回department的value
         def department_to_value(key):
-            return department_dict[key]
+            return DEPARTMENT_DICT[key]
 
         # 根据selectbox传来的key返回department的value
         def option_to_value(key):
-            return option_dict[key]
+            return OPTION_DICT[key]
 
         # input控件：创建者ID
         creater = st.sidebar.text_input(label="创建者ID", value=sys_info_df.values[0][1])
@@ -249,7 +238,7 @@ def show_sidebar(sys_info_df):
         # selectbox控件，所属部门
         department = st.sidebar.selectbox(
             label="所属部门",
-            options=(list(department_dict.keys())),
+            options=(list(DEPARTMENT_DICT.keys())),
             index=sys_info_df.values[0][2],
             format_func=department_to_value,
         )
@@ -270,7 +259,7 @@ def show_sidebar(sys_info_df):
         # selectbox控件，变更情况
         option = st.sidebar.selectbox(
             label="变更情况",
-            options=(list(option_dict.keys())),
+            options=(list(OPTION_DICT.keys())),
             index=sys_info_df.values[0][6],
             format_func=option_to_value,
         )
