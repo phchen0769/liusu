@@ -124,7 +124,7 @@ def aggrid(stu_info_df):
         # 打开ag-grid调试信息,选择后输出调试信息
         # gd.configure_grid_options(onRowSelected=js_console)
         # 配置列的默认设置
-        gd.configure_auto_height(autoHeight=True)
+        # gd.configure_auto_height(autoHeight=True)
         gd.configure_default_column(
             # # 可编辑
             editable=True,
@@ -182,8 +182,8 @@ def aggrid(stu_info_df):
         gd.configure_side_bar()
         # 分页
         gd.configure_pagination(
-            # paginationAutoPageSize=False,
-            # paginationPageSize=20,
+            paginationAutoPageSize=False,
+            paginationPageSize=30,
         )
 
         gridoptions = gd.build()
@@ -410,7 +410,7 @@ def main():
     # 显示content页
     show_content(stu_info_df, sys_info_df)
 
-    st.info("作者：陈沛华")
+    st.info("作者：陈沛华，时间：2023年6月20日")
 
 
 if __name__ == "__main__":
