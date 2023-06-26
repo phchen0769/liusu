@@ -1,12 +1,8 @@
-import os
-
-import base64
 import streamlit as st
 import pandas as pd
 from st_aggrid import (
     AgGrid,
     JsCode,
-    ColumnsAutoSizeMode,
     DataReturnMode,
     GridUpdateMode,
     GridOptionsBuilder,
@@ -15,9 +11,7 @@ from st_aggrid import (
 from db_operator import (
     out_sql,
     to_sql_stu_info,
-    to_sql_sys_info,
     update_sys_info_table,
-    update_sn_num_table,
     read_xlsx,
     del_data,
 )
@@ -182,7 +176,9 @@ def aggrid(stu_info_df):
         gd.configure_side_bar()
         # 分页
         gd.configure_pagination(
+            # 取消自动分页
             paginationAutoPageSize=False,
+            # 30页一分页
             paginationPageSize=30,
         )
 
@@ -271,7 +267,7 @@ def show_sidebar(sys_info_df):
         # form_submit_button控件，表单提交按钮
 
         with sb_col2:
-            if st.form_submit_button("更新"):
+            if st.form_submit_button("更新", help="保存系统配置信息到数据库。"):
                 # 把数据转换成pf
                 sys_info_df = pd.DataFrame(
                     {
@@ -341,7 +337,7 @@ def show_content(stu_info_df, sys_info_df):
                 st.warning("第五步：非必须")
 
             with col2:
-                if st.form_submit_button("保存"):
+                if st.form_submit_button("保存", help="保存修改的学生信息。"):
                     if del_data(id=0) and to_sql_stu_info(grid_res.data):
                         st.success("学生信息已保存！")
                     else:
