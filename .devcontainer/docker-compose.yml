@@ -1,11 +1,11 @@
 version: "3.7"
 services:
   streamlit:
-    container_name: liusu_streamlit2
-    image: 15622992020/liusu_stream:latest
+    build: ./
+    container_name: liusu_streamlit
     ports:
       - "8888:8888"
     working_dir: "/workspaces/liusu"
     volumes:
       - /Volumes/myData/github/liusu:/workspaces/liusu
-    command: "streamlit run --server.port 8888"
+    command: "streamlit run index.py --server.port 8888"
