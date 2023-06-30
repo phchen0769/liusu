@@ -3,3 +3,4 @@ pandas
 streamlit
 sqlalchemy
 streamlit-aggrid
+streamlit_authenticator

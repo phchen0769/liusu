@@ -18,16 +18,6 @@ from db_operator import (
 from body_create import body_create_df, DEPARTMENT_DICT, OPTION_DICT
 from info_send import get_token, info_send
 
-# 初始化 站点显示参数
-st.set_page_config(
-    page_title="学生留宿管理系统",
-    page_icon="🇨🇳",
-    layout="wide",
-    initial_sidebar_state="auto",
-    menu_items=None,
-)
-
-
 # 打开aggrid调试信息
 # js_console = JsCode(
 #     """
