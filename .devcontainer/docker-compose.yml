@@ -8,4 +8,4 @@ services:
     working_dir: "/workspaces/liusu"
     volumes:
       - /Volumes/myData/github/liusu:/workspaces/liusu
-    command: "streamlit run index.py --server.port 8888"
+    command: "streamlit run auth.py --server.port 8888"

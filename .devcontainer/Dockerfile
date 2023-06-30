@@ -9,4 +9,4 @@ RUN pip3 install -r /root/requirements.txt
 
 EXPOSE 8888
 
-CMD ["streamlit", "run", "index.py", "--server.port 8888"]
+CMD ["streamlit", "run", "auth.py", "--server.port 8888"]
