@@ -7,5 +7,5 @@ services:
       - "8888:8888"
     working_dir: "/workspaces/liusu"
     volumes:
-      - /Volumes/myData/github/liusu:/workspaces/liusu
+      - /Volumes/Extreme SSD/github/liusu:/workspaces/liusu
     command: "streamlit run auth.py --server.port 8888"
