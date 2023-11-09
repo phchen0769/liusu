@@ -13,8 +13,8 @@
             "program": "/home/vscode/.local/bin/streamlit",
             "args": [
                 "run",
-                // "index.py"
-                "${file}",
+                "auth.py",
+                // "${file}",
                 "--server.port",
                 "8888"
             ],
