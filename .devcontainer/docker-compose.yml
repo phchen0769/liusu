@@ -1,17 +1,16 @@
 version: "3.7"
 services:
-  streamlit:
+  yuejuan_streamlit:
     build: ./
-    container_name: liusu_streamlit
+    container_name: yuejuan_streamlit
     ports:
-      - "8899:8899"
-    working_dir: "/workspaces/liusu"
+      - "8888:8888"
+    working_dir: "/workspaces/yuejuan_streamlit"
     volumes:
-      # - /Volumes/Extreme SSD/github/liusu:/workspaces/liusu
-      - /Users/fedorov/Documents/GitHub/liusu:/workspaces/liusu
-    command: "streamlit run auth.py --server.port 8899"
+      - /Users/fedorov/Documents/GitHub/yuejuan_streamlit:/workspaces/yuejuan_streamlit
+    command: "streamlit run auth.py --server.port 8888"
 
-  streamlit:
+  liusu_streamlit:
     build: ./
     container_name: liusu_streamlit
     ports:
