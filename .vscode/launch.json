@@ -6,7 +6,7 @@
     "configurations": [
         {
             "name": "Python: Streamlit",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             // "program": "${file}",
             // "console": "integratedTerminal",
@@ -16,7 +16,7 @@
                 "auth.py",
                 // "${file}",
                 "--server.port",
-                "8888"
+                "8899"
             ],
             "env": {
                 "PYTHONPATH": "${workspaceRoot}"

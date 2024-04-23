@@ -1,11 +1,31 @@
-FROM mcr.microsoft.com/devcontainers/python:0-3.11
+FROM python:3.10-alpine3.19
 
 LABEL MAINTAINER = "Fedorov"
 
+# 替换apk使用的源
+COPY repositories /etc/apk/repositories
 COPY requirements.txt /root/requirements.txt
 
-RUN pip3 install --upgrade pip && pip3 config set global.index-url https:\/\/pypi.tuna.tsinghua.edu.cn\/simple
-RUN pip3 install -r /root/requirements.txt
+# 设定容器时间
+RUN echo "export TZ='UTC'" > /etc/profile
+
+# Install required packages and remove the apk packages cache when done.
+RUN apk --update --no-cache add python3-dev \
+	g++ \
+	pcre-dev \
+	musl-dev \
+	libxml2-dev \
+	libxslt-dev \
+	jpeg-dev
+
+RUN pip3 install --no-cache-dir -r /root/requirements.txt
+
+# 添加/root/.local/bin目录到环境变量
+# ENV PATH="/root/.local/bin:${PATH}"
+# RUN  rm -r /root/.cache
+
+# 设置环境变量
+ENV PYTHONPATH=/workspaces/liusu:$PYTHONPATH
 
 EXPOSE 8899
 
