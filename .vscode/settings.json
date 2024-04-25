@@ -1,12 +1,11 @@
 {
-    "editor.fontSize": 20,
-    "workbench.colorTheme": "Copilot Theme",
-    "editor.fontFamily": "YOUR FONT, Menlo, Monaco, 'Courier New', monospace",
     "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter"
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true
     },
-    "editor.formatOnSave": true,
-    "python.formatting.provider": "ms-python.black-formatter",
+
+    "python.formatting.provider": "none",
+    "workbench.colorTheme": "Atom One Dark",
     "python.analysis.autoSearchPaths": true,
     "python.autoComplete.extraPaths": [
         "/usr/lib/python3.11/site-packages",
@@ -15,6 +14,5 @@
     "python.analysis.extraPaths": [
         "/usr/lib/python3.11/site-packages",
         "/usr/lib/python3.11/"
-    ],
-    "window.zoomLevel": -0.5,
+    ]
 }
