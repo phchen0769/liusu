@@ -6,18 +6,27 @@
     "configurations": [
         {
             "name": "Python: Streamlit",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
-            // "program": "${file}",
-            // "console": "integratedTerminal",
             "program": "/home/vscode/.local/bin/streamlit",
             "args": [
                 "run",
                 "auth.py",
-                // "${file}",
                 "--server.port",
-                "8888"
+                "8899"
             ],
+            "env": {
+                "PYTHONPATH": "${workspaceRoot}"
+            },
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Python: CurrentFile",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
             "env": {
                 "PYTHONPATH": "${workspaceRoot}"
             },
